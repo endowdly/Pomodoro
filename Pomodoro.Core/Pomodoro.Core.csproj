@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>Endowdly.Pomodoro.Core</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Update="IPomodoroState.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>IPomodoroState.designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="IPomodoroState.designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>IPomodoroState.tt</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+</Project>

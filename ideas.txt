@@ -1,0 +1,36 @@
+Pomodoro Timer
+    State
+        Inactive
+        Pomodoro
+        ShortBreak
+        LongBreak
+    StartTime
+    TaskDuration
+    PomodoroCounter
+    SetLength
+    Task
+    ShortBreakDuration    
+    LongBreakDuration
+
+Default Pomodoro Timer
+    Task = :)
+    TaskDuration = 25 minutes
+    ShortBreakDuration = 3 minutes
+    LongBreakDuration = 15 minutes
+    SetLength = 4 pomodoros 
+    
+Console App
+    Arguments 
+        StartDelay
+        Task
+        TaskDuration
+        ShortBreakDuration
+        LongBreakDuration
+        PomodoroCounter
+        SetLength
+    Options 
+        Annoying
+        Log?  
+    Format
+    Messages
+    EventHandler

@@ -1,0 +1,5 @@
+﻿<#
+var states = new [] { "InactivePomodoro", "ActivePomodoro", "PomodoroBreak" };
+#>
+
+<#@ include file="..\FoldStates.ttinclude" #>
