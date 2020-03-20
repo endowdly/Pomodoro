@@ -5,10 +5,14 @@
 
     public sealed class PomodoroTimer
     {
-        private Timer timer;
-        private IPomodoroState state;
+        public Timer Timer { get; private set; }
+        public Timer Metronome { get; private set; }
+        public int SecondsElapsed { get; private set; }
+        public int CurrentDuration { get; private set; } // The current state's timer interval in seconds
 
+        private IPomodoroState state; 
         public event EventHandler StateChange;
+
 
         public Task Task { get; }
         public bool IsActive
@@ -31,6 +35,19 @@
                     pomStateActive => false,
                     pomStateBreak => true
                     );
+            }
+        }
+        public State CurrentState
+        {
+            get
+            {
+                return state.Func(
+                    pomStateInactive => State.Inactive,
+                    pomStateActive => State.Active,
+                    pomStateBreak => PomodoroCounter == SetLength
+                        ? State.LongBreak
+                        : State.ShortBreak
+                );
             }
         }
         public TimeSpan TaskDuration { get; }
@@ -60,7 +77,9 @@
             this.ShortBreakDuration = ShortBreakDuration;
             this.LongBreakDuration = LongBreakDuration;
             this.SetLength = SetLength;
-            PomodoroCounter = 0;
+
+            Metronome = new Timer(1000);
+            Metronome.Elapsed += (o, e) => SecondsElapsed++;
         }
 
         public static PomodoroTimer New()
@@ -97,45 +116,61 @@
                 pomStateActive => pomStateActive,
                 pomStateBreak => pomStateBreak
                 );
+            CurrentDuration = GetCurrentDuration();
+            PomodoroCounter = 1;
+            SecondsElapsed = 0;
+            Timer = new Timer(TaskDuration.TotalMilliseconds);
+            Timer.Elapsed += TimerElapsed;
 
-            timer = new Timer(TaskDuration.TotalMilliseconds);
-            timer.Elapsed += TimerElapsed;
-            timer.Start();
+            Timer.Start();
+            Metronome.Start(); 
+            OnStateChanged();
         }
 
+        private int GetCurrentDuration() =>
+            (int)state.Func(
+                pomStateInactive => 0,
+                pomStateActive => TaskDuration.TotalSeconds,
+                pomStateBreak => PomodoroCounter == SetLength
+                    ? LongBreakDuration.TotalSeconds
+                    : ShortBreakDuration.TotalSeconds);
+                    
         private void Update()
         {
+            Timer.Stop();
+            SecondsElapsed = 0;
             
             var nextTimerLength = state.Func(
                 pomStateInactive => TaskDuration,
-                pomStateActive => PomodoroCounter < SetLength
-                    ? ShortBreakDuration
-                    : LongBreakDuration,
+                pomStateActive => PomodoroCounter == SetLength
+                    ? LongBreakDuration
+                    : ShortBreakDuration,
                 pomStateBreak => TaskDuration
-                );
-
-            state.Action(
-                pomStateInactive => { },
-                pomStateActive => PomodoroCounter = PomodoroCounter != SetLength
-                    ? PomodoroCounter + 1
-                    : 0,
-                pomStateBreak => { }
-                );
-
+                ); 
+            PomodoroCounter = state.Func(
+                pomStateInactive => PomodoroCounter, 
+                pomStateActive => PomodoroCounter,
+                pomStateBreak => PomodoroCounter == SetLength
+                    ? 1
+                    : PomodoroCounter + 1
+                ); 
             state = state.Transition(
                 pomStateInactive => pomStateInactive,
                 pomStateActive => pomStateActive.Continue(),
                 pomStateBreak => pomStateBreak.Continue()
                 );
+            CurrentDuration = GetCurrentDuration();
+            Timer = new Timer(nextTimerLength.TotalMilliseconds);
+            Timer.Elapsed += TimerElapsed;
 
-            timer = new Timer(nextTimerLength.TotalMilliseconds);
-            timer.Elapsed += TimerElapsed;
-            timer.Start();
+            Timer.Start();
         }
 
         public void Stop()
         {
-            timer?.Stop();
+            Timer?.Stop();
+            Metronome?.Stop();
+            
 
             state = state.Transition(
                 pomStateInactive => pomStateInactive,
@@ -147,6 +182,10 @@
         private void TimerElapsed(object sender, ElapsedEventArgs e)
         {
             Update();
+            OnStateChanged();
         }
+
+        private void OnStateChanged() => StateChange?.Invoke(this, EventArgs.Empty);
     }
 }
+

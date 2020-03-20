@@ -1,131 +1,221 @@
 ﻿namespace Endowdly.Pomodoro.Console
 {
     using System;
-    using System.Threading;
 
     using Endowdly.Pomodoro.Core;
 
     class Program
     {
-        const string Title = "PomTimer";
-        const string Version = "1.0.0";
+        const string Title = "Endowdly Pomodoro Timer";
+        const string Version = "0.0.1";
+        const string Space = " ";
 
         static void Main(string[] args)
         {
-            Console.CursorVisible = false;
+            ConsoleKeyInfo cki;
 
-            Color c;
-            c.fg = ConsoleColor.Black; c.bg = ConsoleColor.Blue;
-
-            Console.WindowHeight = 20;
-            Console.WindowWidth = 80; 
-            Console.Clear();
-
-            Pos from;
-            Pos to;
-
-            // Let's get the window size
-            var h = Console.WindowHeight;
             var w = Console.WindowWidth;
-
-            from.r = 0; from.c = 0;
-            to.r = w; to.c = h;
-
+            var h = Console.WindowHeight;
+            var x = Console.ForegroundColor;
+            var y = Console.BackgroundColor;
             var s = Title + " v" + Version;
 
-            // Find center
+            Console.WriteLine();
+            Console.WriteLine(s);
+            Console.WriteLine();
+            Console.WriteLine();
 
-            DrawColorBlock(c.bg, from, to);
-            WriteCenterText(s, h / 2, c);
+            var pt = PomodoroTimer.Default.With(
+                TaskDuration: TimeSpan.FromSeconds(5),
+                ShortBreakDuration: TimeSpan.FromSeconds(5),
+                LongBreakDuration: TimeSpan.FromSeconds(10));
 
-            Thread.Sleep(500);
-            Console.Clear();
+            Console.BackgroundColor = ConsoleColor.Blue; Console.ForegroundColor = ConsoleColor.Black;
+            Console.Write("Task".CenterString(15));
+            Console.BackgroundColor = ConsoleColor.Black; Console.ForegroundColor = ConsoleColor.Blue;
+            Console.WriteLine(pt.Task.Value.CenterString(35));
+            Console.WriteLine();
+            Console.BackgroundColor = y; Console.ForegroundColor = x;
 
-            Pos barPos; Pos barSize;
-            barPos.r = h / 2; barPos.c = 10;
-            barSize.r = 1; barSize.c = 60;
+            var bar = new ProgressBar(0, 50, pt.CurrentState.ToString());
+            bar.SetPostFix(Space);
 
-            var pt = PomodoroTimer.New().With(TaskDuration: TimeSpan.FromSeconds(60));
-            var bar = new ProgressBar(0, barPos, barSize);
-            bar.BarColor = ConsoleColor.Green;
-
-            Color ptColor;
-            ptColor.bg = ConsoleColor.Black; ptColor.fg = ConsoleColor.Green; 
-
-            DrawColorBlock(ptColor.bg, from, to);
-            WriteCenterText(pt.Task.Value, 2, ptColor);
-            var cText = string.Format("[ {0} / {1} ]", pt.PomodoroCounter, pt.SetLength);
-            WriteCenterText(cText, (h / 2) - 1, ptColor);
-            bar.Draw(); 
-            int nSeconds = 0;
-            var second = new System.Timers.Timer(1000);
-            second.Elapsed += (o, e) => nSeconds++;
-            second.Start();
-            pt.Start();
-
-            Pos pPer;
-            pPer.c = 72; pPer.r = h / 2;
-
-            while (pt.IsActive && !pt.IsBreak && nSeconds <= pt.TaskDuration.TotalSeconds)
+            pt.Metronome.Elapsed += (o, e) => bar.SetPercentage(100 * pt.SecondsElapsed / pt.CurrentDuration);
+            pt.StateChange += (o, e) =>
             {
-                WriteCenterText(nSeconds.ToString(), (h / 2) + 2, ptColor);
+                // Hack: 
+                // Sometimes the Metronome and the StateChange events are not synced.
+                // This is due to rounding errors and one timer has wiggled off one way or the other.
+                // This is a pretty dumb hack to get around that visually.  
+                if (pt.IsActive && !bar.IsComplete) bar.SetPercentage(100);
 
-                var totalSeconds = pt.TaskDuration.TotalSeconds;
-                var percentage = (nSeconds / totalSeconds) * 100;
-                WriteText((percentage/100).ToString("p"), pPer, ptColor);
-                bar.BarColor = ConsoleColor.Green;
-                bar.BackgroundColor = ConsoleColor.Black;
-                bar.SetPercentage(percentage);
-            }
+                switch (pt.CurrentState)
+                {
+                    case State.Active:
+                        bar.SetPostFix((Space + pt.PomodoroCounter.ToString() + " / " + pt.SetLength.ToString()).CenterString(15));
+                        if (pt.PomodoroCounter == pt.SetLength) bar.Mark = true;
+                        break;
+                    default:
+                        bar.SetPostFix(Space);
+                        bar.Mark = false;
+                        break;
+                }
 
-            Console.ReadLine(); 
-        }
+                bar.SetLabel(pt.CurrentState.ToString());
+                bar.SetPercentage(0);
+                bar.Draw(); 
+            };
 
+            
+            bool execState = true;
 
-        private static void WriteText(string s, Pos p, Color c)
-        {
-            Console.CursorLeft = p.c;
-            Console.CursorTop = p.r;
-            Console.BackgroundColor = c.bg;
-            Console.ForegroundColor = c.fg;
-            Console.Write(s); 
-        }
+            Console.CursorVisible = false;
 
-        static void WriteCenterText(string s, int r, Color c)
-        {
-            Pos p;
-            var w = Console.WindowWidth;
-            var col = (w - s.Length) / 2; 
-            p.r = r; p.c = col;
-
-            WriteText(s, p, c); 
-        }
-
-        static void DrawColorBlock(ConsoleColor c, Pos start, Pos end)
-        {
-            Console.BackgroundColor = c;
-
-            for (int y = start.c; y < end.c - 1; y++) 
+            do
             {
-                Console.CursorLeft = start.r;
-                Console.CursorTop = y;
-                Console.WriteLine(string.Empty.PadLeft(end.r - start.r)); 
-            }
+                cki = Console.ReadKey(true);
 
-            Console.CursorTop = end.c - 1;
-            Console.Write(string.Empty.PadLeft(end.r - start.r));
+                switch (cki.Key)
+                {
+                    case ConsoleKey.S:
+                        if (cki.Modifiers.HasFlag(ConsoleModifiers.Control))
+                        {
+                            if (execState)
+                            {
+                                pt.Start();
+                            }
+                            else
+                            {
+                                pt.Stop();
+                                bar = new ProgressBar(0, 50, pt.CurrentState.ToString());
+                                Console.WriteLine(); 
+                            }
+                            execState = !execState;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+
+            } while (cki.Key != ConsoleKey.Escape);
+
+
+            Console.ReadKey(true);
+        }
+
+        private static void WriteLineCenter(string s)
+        {
+            Console.CursorLeft = (Console.WindowWidth - s.Length) / 2;
+            Console.WriteLine(s);
         }
     }
 
-    internal struct Color
+    public static class StringExtensions
     {
-        internal ConsoleColor fg;
-        internal ConsoleColor bg;
+        public static string CenterString(this string toCenter, int totalLength) =>
+            toCenter
+                .PadLeft(((totalLength - toCenter.Length) / 2) + toCenter.Length)
+                .PadRight(totalLength);
     }
 
-    internal struct Pos
+    public class ProgressBar
     {
-        internal int r; 
-        internal int c;
+        const string AltTwirl = @"└┌┐┘";
+        const string Space = " ";
+        const char Radical = (char)0x221a;
+
+        double percentComplete;
+        int width;
+        string label;
+        int progress;
+        string postfix;
+        bool mark;
+        int x0;
+        int y0;
+
+        internal ProgressBar(double x, int n, string s)
+        {
+            percentComplete = x;
+            width = n;
+            label = s;
+            progress = 0;
+            postfix = string.Empty;
+            x0 = Console.CursorLeft;
+            y0 = Console.CursorTop;
+        }
+
+        public bool IsComplete
+        {
+            get { return percentComplete == 100; }
+        }
+
+        public bool Mark
+        {
+            get { return mark; }
+            set
+            {
+                mark = value;
+            }
+        }
+
+        public void Draw()
+        {
+            var s = label.CenterString(width);
+            var x = Console.ForegroundColor;
+            var y = Console.BackgroundColor;
+            double widthDone = Math.Round(width * (percentComplete / 100));
+            double widthRem = width - widthDone;
+            var s0 = s.Substring(0, (int)widthDone);  // 0-length substrings are allowed
+            var s1 = s.Substring(s.Length - (int)widthRem);
+
+            Console.SetCursorPosition(0, y0);
+            Console.Write(string.Empty.PadRight(Console.WindowWidth));  // flush the line
+            Console.SetCursorPosition(0, y0);
+            Console.ForegroundColor = ConsoleColor.Black;
+            Console.BackgroundColor = ConsoleColor.Green;
+            Console.Write(s0);
+            Console.SetCursorPosition((int)widthDone, y0);
+            Console.BackgroundColor = y;
+            Console.ForegroundColor = x;
+            Console.Write(s1);
+            Console.ForegroundColor = ConsoleColor.Magenta;
+            Console.Write(Space);
+            Console.Write(AltTwirl[progress % AltTwirl.Length]); 
+            Console.ForegroundColor = x;
+            Console.CursorLeft--;
+
+            if (percentComplete >= 100) Console.Write(postfix);
+          
+            Console.ForegroundColor = ConsoleColor.Green;
+
+            if (percentComplete >= 100 && mark) Console.Write(Space + Radical);
+
+            Console.ForegroundColor = x;
+            Console.BackgroundColor = y;
+        }
+
+        public void SetLabel(string s) => label = s;
+        public void SetPostFix(string s) => postfix = s;
+
+        public void Inc()
+        {
+            percentComplete++;
+            progress++;
+            Draw();
+        }
+
+        public void Dec()
+        {
+            percentComplete--;
+            progress++;
+            Draw();
+        }
+
+        public void SetPercentage(double n)
+        {
+            percentComplete = n;
+            progress++;
+            Draw();
+        }
     }
 }
