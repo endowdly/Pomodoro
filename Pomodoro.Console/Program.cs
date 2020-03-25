@@ -9,6 +9,7 @@
         const string Title = "Endowdly Pomodoro Timer";
         const string Version = "0.0.1";
         const string Space = " ";
+        static string TaskLabel = "Task".CenterString(15);
 
         static void Main(string[] args)
         {
@@ -30,14 +31,18 @@
                 ShortBreakDuration: TimeSpan.FromSeconds(5),
                 LongBreakDuration: TimeSpan.FromSeconds(10));
 
-            Console.BackgroundColor = ConsoleColor.Blue; Console.ForegroundColor = ConsoleColor.Black;
-            Console.Write("Task".CenterString(15));
-            Console.BackgroundColor = ConsoleColor.Black; Console.ForegroundColor = ConsoleColor.Blue;
-            Console.WriteLine(pt.Task.Value.CenterString(35));
+            ConsoleUtility.WriteColor(
+                Text: TaskLabel,
+                ForegroundColor: ConsoleColor.Black,
+                BackgroundColor: ConsoleColor.Blue);
+            ConsoleUtility.WriteColorLine(
+                Text: pt.Task.Value.CenterString(35),
+                ForegroundColor: ConsoleColor.Blue,
+                BackgroundColor: ConsoleColor.Black);
             Console.WriteLine();
-            Console.BackgroundColor = y; Console.ForegroundColor = x;
 
             var bar = new ProgressBar(0, 50, pt.CurrentState.ToString());
+
             bar.SetPostFix(Space);
 
             pt.Metronome.Elapsed += (o, e) => bar.SetPercentage(100 * pt.SecondsElapsed / pt.CurrentDuration);
@@ -118,6 +123,49 @@
                 .PadRight(totalLength);
     }
 
+    internal static class ConsoleUtility
+    {
+        internal static void WriteColor(string Text, ConsoleColor? ForegroundColor = null, ConsoleColor? BackgroundColor = null)
+        {
+            var r0 = Console.ForegroundColor;
+            var r1 = Console.BackgroundColor;
+
+            Console.ForegroundColor = ForegroundColor ?? r0;
+            Console.BackgroundColor = BackgroundColor ?? r1; 
+            Console.Write(Text); 
+            Console.ForegroundColor = r0; Console.BackgroundColor = r1;
+        }
+
+        internal static void WriteColor(char Char, ConsoleColor? ForegroundColor = null, ConsoleColor? BackgroundColor = null)
+        {
+            var r0 = Console.ForegroundColor;
+            var r1 = Console.BackgroundColor;
+
+            Console.ForegroundColor = ForegroundColor ?? r0;
+            Console.BackgroundColor = BackgroundColor ?? r1; 
+            Console.Write(Char); 
+            Console.ForegroundColor = r0; Console.BackgroundColor = r1; 
+        }
+
+        internal static void WriteColorLine(string Text, ConsoleColor? ForegroundColor = null, ConsoleColor? BackgroundColor = null)
+        {
+            var r0 = Console.ForegroundColor;
+            var r1 = Console.BackgroundColor;
+
+            Console.ForegroundColor = ForegroundColor ?? r0;
+            Console.BackgroundColor = BackgroundColor ?? r1; 
+            Console.WriteLine(Text); 
+            Console.ForegroundColor = r0; Console.BackgroundColor = r1;
+        }
+
+        internal static void ClearLine(int row)
+        {
+            Console.SetCursorPosition(0, row);
+            Console.Write(string.Empty.PadRight(Console.WindowWidth));
+            Console.SetCursorPosition(0, row);
+        }
+    }
+
     public class ProgressBar
     {
         const string AltTwirl = @"└┌┐┘";
@@ -125,13 +173,11 @@
         const char Radical = (char)0x221a;
 
         double percentComplete;
-        int width;
+        readonly int width;
         string label;
         int progress;
         string postfix;
-        bool mark;
-        int x0;
-        int y0;
+        readonly int y0;
 
         internal ProgressBar(double x, int n, string s)
         {
@@ -140,7 +186,6 @@
             label = s;
             progress = 0;
             postfix = string.Empty;
-            x0 = Console.CursorLeft;
             y0 = Console.CursorTop;
         }
 
@@ -149,49 +194,37 @@
             get { return percentComplete == 100; }
         }
 
-        public bool Mark
-        {
-            get { return mark; }
-            set
-            {
-                mark = value;
-            }
-        }
+        public bool Mark { get; set; }
 
         public void Draw()
         {
             var s = label.CenterString(width);
-            var x = Console.ForegroundColor;
-            var y = Console.BackgroundColor;
             double widthDone = Math.Round(width * (percentComplete / 100));
             double widthRem = width - widthDone;
             var s0 = s.Substring(0, (int)widthDone);  // 0-length substrings are allowed
             var s1 = s.Substring(s.Length - (int)widthRem);
 
-            Console.SetCursorPosition(0, y0);
-            Console.Write(string.Empty.PadRight(Console.WindowWidth));  // flush the line
-            Console.SetCursorPosition(0, y0);
-            Console.ForegroundColor = ConsoleColor.Black;
-            Console.BackgroundColor = ConsoleColor.Green;
-            Console.Write(s0);
+            ConsoleUtility.ClearLine(y0);
+            ConsoleUtility.WriteColor(
+                Text: s0,
+                ForegroundColor: ConsoleColor.Black,
+                BackgroundColor: ConsoleColor.Green);
             Console.SetCursorPosition((int)widthDone, y0);
-            Console.BackgroundColor = y;
-            Console.ForegroundColor = x;
-            Console.Write(s1);
-            Console.ForegroundColor = ConsoleColor.Magenta;
+            Console.Write(s1); 
             Console.Write(Space);
-            Console.Write(AltTwirl[progress % AltTwirl.Length]); 
-            Console.ForegroundColor = x;
-            Console.CursorLeft--;
+            ConsoleUtility.WriteColor(
+                Char: AltTwirl[progress % AltTwirl.Length],
+                ForegroundColor: ConsoleColor.Magenta);
+            Console.SetCursorPosition(Console.CursorLeft - 1, y0);  // Console.CursorLeft-- sometimes causes an overflow
 
             if (percentComplete >= 100) Console.Write(postfix);
           
             Console.ForegroundColor = ConsoleColor.Green;
 
-            if (percentComplete >= 100 && mark) Console.Write(Space + Radical);
-
-            Console.ForegroundColor = x;
-            Console.BackgroundColor = y;
+            if (percentComplete >= 100 && Mark)
+                ConsoleUtility.WriteColor(
+                    Text: Space + Radical,
+                    ForegroundColor: ConsoleColor.Green); 
         }
 
         public void SetLabel(string s) => label = s;

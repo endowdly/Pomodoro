@@ -82,12 +82,7 @@
             Metronome.Elapsed += (o, e) => SecondsElapsed++;
         }
 
-        public static PomodoroTimer New()
-        {
-            return Default;
-        }
-
-        public static PomodoroTimer New(Task t)
+        public static PomodoroTimer WithTask(Task t)
         {
             return Default.With(
                 Task: t
