@@ -24,11 +24,14 @@
             Console.WriteLine();
             Console.WriteLine(s);
             Console.WriteLine();
-            Console.WriteLine();
 
             var taskRow = Console.CursorTop;
             var barRow = Console.CursorTop + 2;
             var conRow = Console.CursorTop + 4;
+
+            // Hack: the buffer may not be big enough for some of the cursor commands
+            Console.BufferHeight += conRow;
+            Console.SetCursorPosition(0, taskRow);
 
             Option opts = Option.Parse(args);
 
@@ -150,14 +153,20 @@
 
 
                         if (conk.Key.HasFlag(ConsoleKey.Y))
+                        {
+                            ConsoleUtility.ClearLine(conRow);
                             return;
+                        }
 
                         ConsoleUtility.ClearLine(conRow);
                         break; 
 
                     case ConsoleKey.C:
                         if (cki.Modifiers.HasFlag(ConsoleModifiers.Control))
+                        {
+                            ConsoleUtility.ClearLine(conRow);
                             return;
+                        }
                         break;
 
                     case ConsoleKey.L:

@@ -1,0 +1,5 @@
+Pomodoro.Console:
+    ☐ BUG: Options are not being parsed correctly
+        -- e.g., -t test me -d 00:00:00 -> TaskName is test and d is incorrect
+    ☐ BUG: There is a visual artifact on some bars
+        -- this is likely due to the two safety guard hacks on the width of the bars
