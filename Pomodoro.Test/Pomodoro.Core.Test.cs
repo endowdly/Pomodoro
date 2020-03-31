@@ -125,7 +125,7 @@
 
     public class TimerTests
     {
-        static PomodoroTimer timer = PomodoroTimer.New();
+        static PomodoroTimer timer = PomodoroTimer.Default;
 
         [Fact]
         public void WhenNewTimerIsNotActive()
@@ -173,7 +173,7 @@
         [Fact]
         public void WhenStartGivenNewTimerStateIsActive()
         {
-            var innerTimer = PomodoroTimer.New();
+            var innerTimer = PomodoroTimer.Default;
             innerTimer.Start();
             Assert.True(innerTimer.IsActive);
         }
@@ -182,7 +182,7 @@
         public void WhenNewGivenFastTimeTaskDurationIsFast()
         {
             var fast = TimeSpan.FromMilliseconds(1);
-            var innerTimer = PomodoroTimer.New().With(TaskDuration: fast);
+            var innerTimer = PomodoroTimer.Default.With(TaskDuration: fast);
             Assert.Equal(TimeSpan.FromMilliseconds(1), innerTimer.TaskDuration);
         }
 
@@ -190,7 +190,7 @@
         public void WhenStartGivenFastTimerStateIsActiveAndBreak()
         {
             var fast = TimeSpan.FromMilliseconds(1);
-            var innerTimer = PomodoroTimer.New().With(TaskDuration: fast);
+            var innerTimer = PomodoroTimer.Default.With(TaskDuration: fast);
             innerTimer.Start();   // after 10 ms we should be moving to break
             Thread.Sleep(10);
             Assert.NotEqual(innerTimer, timer);
@@ -201,7 +201,7 @@
         [Fact]
         public void WhenStopGiveNewTimerStateIsInActive()
         {
-            var innerTimer = PomodoroTimer.New();
+            var innerTimer = PomodoroTimer.Default;
             innerTimer.Stop();
             Assert.False(innerTimer.IsActive);
             Assert.False(innerTimer.IsBreak);

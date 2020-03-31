@@ -34,3 +34,19 @@ Console App
     Format
     Messages
     EventHandler
+    ! Overall a little more complicated for the sake of learning
+
+
+How to Handle Options
+    CommandLine Nuget Package 
+        +Small
+        +Easy
+        +Familiar (I have used it before and I like it)
+        -I learn nothing
+        -A DEPENDENCY :O
+    Maybe a visitor pattern parser?
+        +I learn something
+
+How to Hand Commands
+    I need a few for when the console is running
+    Command pattern obviously?

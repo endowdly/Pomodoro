@@ -10,9 +10,9 @@ namespace Endowdly.Pomodoro.Core
 
         private Task(string s)
         {
-            //Value = IsValid(s)
-            //    ? s.Trim()
-            //    : string.Empty; 
+            Value = IsValid(s)
+                ? s.Trim()
+                : string.Empty;
 
             Value = s.Trim();
         }
@@ -33,22 +33,22 @@ namespace Endowdly.Pomodoro.Core
             return Empty;
         }
 
-        //private static bool IsValid(string s)
-        //{
-        //    var lineBreakChars = new char[]
-        //    {
-        //        (char)0x0a,   // lf
-        //        (char)0x0b,   // ff
-        //        (char)0x0c,   // f
-        //        (char)0x0d,   // cr
-        //        (char)0x85,   // cr
-        //        (char)0x1e,   // rs
-        //        (char)0x2028, // nel (next line)
-        //        (char)0x2029, // ps (paragraph seperator)
-        //    };
+        private static bool IsValid(string s)
+        {
+            var lineBreakChars = new char[]
+            {
+                (char)0x0a,   // lf
+                (char)0x0b,   // ff
+                (char)0x0c,   // f
+                (char)0x0d,   // cr
+                (char)0x85,   // cr
+                (char)0x1e,   // rs
+                (char)0x2028, // nel (next line)
+                (char)0x2029, // ps (paragraph seperator)
+            };
 
-        //    return s.IndexOfAny(lineBreakChars).Equals(-1);
-        //}
+            return s.IndexOfAny(lineBreakChars).Equals(-1);
+        }
 
         private bool Equals(Task other)
         {

@@ -37,6 +37,9 @@
                     );
             }
         }
+
+        public object With(string Task, TimeSpan TaskDuration, TimeSpan ShortBreakDuration, TimeSpan LongBreakDuration) => throw new NotImplementedException();
+
         public State CurrentState
         {
             get
@@ -82,12 +85,7 @@
             Metronome.Elapsed += (o, e) => SecondsElapsed++;
         }
 
-        public static PomodoroTimer New()
-        {
-            return Default;
-        }
-
-        public static PomodoroTimer New(Task t)
+        public static PomodoroTimer WithTask(Task t)
         {
             return Default.With(
                 Task: t
@@ -138,7 +136,6 @@
         private void Update()
         {
             Timer.Stop();
-            SecondsElapsed = 0;
             
             var nextTimerLength = state.Func(
                 pomStateInactive => TaskDuration,
@@ -161,7 +158,8 @@
                 );
             CurrentDuration = GetCurrentDuration();
             Timer = new Timer(nextTimerLength.TotalMilliseconds);
-            Timer.Elapsed += TimerElapsed;
+            Timer.Elapsed += TimerElapsed; 
+            SecondsElapsed = 0;
 
             Timer.Start();
         }
