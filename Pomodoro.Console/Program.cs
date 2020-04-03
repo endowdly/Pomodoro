@@ -9,7 +9,7 @@
         private const string Title = "Endowdly Pomodoro Timer";
         private const string Version = "0.0.3";
         private const string Space = " ";
-        private static string TaskLabel = "Task".CenterString(15);
+        private static readonly string TaskLabel = "Task".CenterString(15);
 
         private static void Main(string[] args)
         {
@@ -78,7 +78,6 @@
                 // This is due to rounding errors and one timer has wiggled off one way or the other.
                 // This is a pretty dumb hack to get around that visually.
                 ConsoleUtility.ClearLine(barRow);
-                //if (pt.IsActive && !bar.IsComplete) bar.SetPercentage(100);
 
                 bar.SetLabel(pt.CurrentState.ToString());
                 bar.SetPercentage(0);
@@ -267,18 +266,17 @@
         private double percentComplete;
         private readonly int width;
         private string label;
-        private int progress;
         private string postfix;
         private readonly int y0;
 
-        public int Progress => progress;
+        public int Progress { get; private set; }
 
         internal ProgressBar(double x, int n, string s)
         {
             percentComplete = x;
             width = n;
             label = s;
-            progress = 0;
+            Progress = 0;
             postfix = string.Empty;
             y0 = Console.CursorTop;
         }
@@ -294,26 +292,26 @@
         {
             var s = label.CenterString(width);
             // Hack: Sometimes widthDone is overflow if the timers are out of sync!? 
-            double widthDone = (width * (percentComplete / 100)) > width
-                ? (double)width
-                : width * (percentComplete / 100);
+            int widthDone = (width * percentComplete / 100) > width
+                ? width
+                : (int)(width * percentComplete / 100);
             // Hack: Sometimes widthRem is negative if the timers are out of sync!? 
-            double widthRem = (width - widthDone) < 0
+            int widthRem = (width - widthDone) < 0
                 ? 0
                 : width - widthDone; 
-            var s0 = s.Substring(0, (int)widthDone);  // 0-length substrings are allowed
-            var s1 = s.Substring(s.Length - (int)widthRem);
+            var s0 = s.Substring(0, widthDone);  // 0-length substrings are allowed
+            var s1 = s.Substring(s.Length - widthRem);
 
             ConsoleUtility.ClearLine(y0);
             ConsoleUtility.WriteColor(
                 Text: s0,
                 ForegroundColor: ConsoleColor.Black,
                 BackgroundColor: ConsoleColor.Green);
-            Console.SetCursorPosition((int)widthDone, y0);
+            Console.SetCursorPosition(widthDone, y0);
             Console.Write(s1);
             Console.Write(Space);
             ConsoleUtility.WriteColor(
-                Char: AltTwirl[progress % AltTwirl.Length],
+                Char: AltTwirl[Progress % AltTwirl.Length],
                 ForegroundColor: ConsoleColor.Magenta);
             Console.Write(postfix);
 
@@ -330,21 +328,21 @@
         public void Inc()
         {
             percentComplete++;
-            progress++;
+            Progress++;
             Draw();
         }
 
         public void Dec()
         {
             percentComplete--;
-            progress++;
+            Progress++;
             Draw();
         }
 
         public void SetPercentage(double n)
         {
             percentComplete = n;
-            progress++;
+            Progress++;
             Draw();
         }
     }

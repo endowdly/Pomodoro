@@ -9,13 +9,13 @@ namespace Endowdly.Pomodoro.Console
         None = 0,
 
         Help         = 1 << 0,
-        TaskName     = 2 << 1,
-        TaskDuration = 3 << 2,
-        ShortBreak   = 4 << 3,
-        LongBreak    = 5 << 4,
-        SetLength    = 6 << 5,
-        RecordStats  = 7 << 6,
-        BeAnnoying   = 8 << 7, 
+        TaskName     = 1 << 1,
+        TaskDuration = 1 << 2,
+        ShortBreak   = 1 << 3,
+        LongBreak    = 1 << 4,
+        SetLength    = 1 << 5,
+        RecordStats  = 1 << 6,
+        BeAnnoying   = 1 << 7, 
         
         All = ~(~0 << 8),
 
