@@ -17,6 +17,7 @@
             string LongBreakDuration = null,
             int SetLength = 0,
             bool DisplayHelp = false,
+            bool DisplayVersion = false,
             bool CollectStats = false,
             bool BeAnnoying = false,
             string LogFilePath = null)
@@ -27,6 +28,7 @@
             this.LongBreakDuration = LongBreakDuration;
             this.SetLength = SetLength;
             this.DisplayHelp = DisplayHelp;
+            this.DisplayVersion = DisplayVersion;
             this.CollectStats = CollectStats;
             this.BeAnnoying = BeAnnoying;
             this.LogFilePath = LogFilePath;
@@ -37,6 +39,7 @@
         public bool BeAnnoying { get; set; }
         public bool CollectStats { get; set; }
         public bool DisplayHelp { get; set; }
+        public bool DisplayVersion { get; set; }
         public string LogFilePath { get; set; }
         public string LongBreakDuration { get; set; }
         public TimeSpan LongBreakTs => longBreakTs;
@@ -155,6 +158,7 @@
             string LongBreakDuration = null,
             int? SetLength = null,
             bool? DisplayHelp = null,
+            bool? DisplayVersion = null,
             bool? CollectStats = null,
             bool? BeAnnoying = null,
             string LogFilePath = null
@@ -165,6 +169,7 @@
             LongBreakDuration: LongBreakDuration ?? this.LongBreakDuration,
             SetLength: SetLength ?? this.SetLength,
             DisplayHelp: DisplayHelp ?? this.DisplayHelp,
+            DisplayVersion: DisplayVersion ?? this.DisplayVersion,
             CollectStats: CollectStats ?? this.CollectStats,
             BeAnnoying: BeAnnoying ?? this.BeAnnoying,
             LogFilePath: LogFilePath ?? this.LogFilePath

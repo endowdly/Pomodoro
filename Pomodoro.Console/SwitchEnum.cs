@@ -16,11 +16,13 @@ namespace Endowdly.Pomodoro.Console
         SetLength    = 1 << 5,
         RecordStats  = 1 << 6,
         BeAnnoying   = 1 << 7, 
+        Version   = 1 << 8, 
         
-        All = ~(~0 << 8),
+        All = ~(~0 << 9),
 
         BinarySwitch = Help
             | RecordStats
+            | Version
             | BeAnnoying,
 
         SingleArgumentSwitch = TaskDuration

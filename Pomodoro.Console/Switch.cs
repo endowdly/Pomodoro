@@ -19,6 +19,7 @@ namespace Endowdly.Pomodoro.Console
             { "h", SwitchType.Help },
             { "r", SwitchType.RecordStats },
             { "!", SwitchType.BeAnnoying },
+            { "v", SwitchType.Version },
         };
 
         private static Dictionary<string, SwitchType> doubleDashMap = new Dictionary<string, SwitchType>
@@ -31,6 +32,7 @@ namespace Endowdly.Pomodoro.Console
             { "help", SwitchType.Help },
             { "recordstats", SwitchType.RecordStats },
             { "beannoying", SwitchType.BeAnnoying },
+            { "version", SwitchType.Version },
         };
 
         private Switch(string s)
@@ -84,11 +86,11 @@ namespace Endowdly.Pomodoro.Console
         {
             var s1 = Dashless(s);
 
-            if (s.StartsWith(Dash) && IsValid(s))
-                return dashMap[s1];
-
             if (s.StartsWith(DoubleDash) && IsValid(s))
                 return doubleDashMap[s1];
+
+            if (s.StartsWith(Dash) && IsValid(s))
+                return dashMap[s1]; 
 
             return SwitchType.None;
         }

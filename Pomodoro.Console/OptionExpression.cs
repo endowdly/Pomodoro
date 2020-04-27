@@ -22,6 +22,7 @@ namespace Endowdly.Pomodoro.Console
                 { SwitchType.Help, (x, y) => x.With(DisplayHelp: true) },
                 { SwitchType.RecordStats, (x, y) => x.With(CollectStats: true) },
                 { SwitchType.BeAnnoying, (x, y) => x.With(BeAnnoying: true) },
+                { SwitchType.Version, (x, y) => x.With(DisplayVersion: true) },
             };
 
         private OptionExpression(Switch x, Argument[] ys)

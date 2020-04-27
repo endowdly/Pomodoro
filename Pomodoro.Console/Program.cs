@@ -1,14 +1,41 @@
 ﻿namespace Endowdly.Pomodoro.Console
 {
     using System;
+    using System.Linq;
 
     using Endowdly.Pomodoro.Core;
 
     internal class Program
     {
+        // Todo: Move option parsing to top and clean up title displaying.
+
         private const string Title = "Endowdly Pomodoro Timer";
         private const string Version = "0.0.3";
         private const string Space = " ";
+
+        // Try to stick to a GNU standard help
+        private const string Help = @"
+        Pomodoro.Console.
+
+        Usage:
+        pomodoro.console
+        pomodoro.console [(-t | --taskname) <name>] [(-s | --shortduration) <duration>]
+            [(-l | --longduration) <duration>] [(-p | --setlength) <len>]
+            [-r | --recordstats]) [-! | --beannoying] 
+        pomodoro.console -h | --help
+        pomodoro.console -v | --version
+
+        Options:
+        -h, --help              Show this screen.
+        -v, --version           Shows version and license info.
+        -t, --taskname          Set the name of the task. Default: :)
+        -s, --shortduration     Sets the short break duration. Default: 3 min.
+        -l, --longduration      Sets the long break duration. Default: 15 min.
+        -p, --setlength         Sets the number of sets. Default: 4.
+        -r, --recordstats       Records the amount of pomodoros.
+        -!, --beannoying        Makes the console annoying on state change. 
+        ";
+        private static readonly string VersionString = $"{Title}\n{Version}\nLicense: The Unlicense -> unlicense.org";
         private static readonly string TaskLabel = "Task".CenterString(15);
 
         private static void Main(string[] args)
@@ -31,15 +58,36 @@
 
             // Hack: the buffer may not be big enough for some of the cursor commands
             Console.BufferHeight += conRow;
+
+            // Let's clear the lines needed for the program and scroll down
+            Enumerable
+                .Range(taskRow, 4)
+                .ToList()
+                .ForEach(line => ConsoleUtility.ClearLine(line)); 
+            
             Console.SetCursorPosition(0, taskRow);
 
             Option opts = Option.Parse(args);
+
+            // First check if we have a help switch anywhere!
+            if (opts.DisplayHelp == true)
+            {
+                Console.WriteLine(Help);
+                return; 
+            }
+
+            if (opts.DisplayVersion == true)
+            {
+                Console.WriteLine(VersionString);
+                return; 
+            }
 
             var pt = PomodoroTimer.Default.With(
                 Task: Task.New(opts.TaskName),
                 TaskDuration: opts.TaskTs,
                 ShortBreakDuration: opts.ShortBreakTs,
-                LongBreakDuration: opts.LongBreakTs
+                LongBreakDuration: opts.LongBreakTs,
+                SetLength: opts.SetLength
                 );
 
             ConsoleUtility.WriteColor(
