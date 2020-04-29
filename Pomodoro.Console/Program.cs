@@ -82,6 +82,9 @@
                 return; 
             }
 
+            if (opts.CollectStats == true) 
+                Console.WriteLine("Recording statistics is currently unsupported. Stand by.");
+
             var pt = PomodoroTimer.Default.With(
                 Task: Task.New(opts.TaskName),
                 TaskDuration: opts.TaskTs,

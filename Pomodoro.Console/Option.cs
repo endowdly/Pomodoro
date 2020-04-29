@@ -6,10 +6,12 @@
 
     internal class Option
     {
+        private readonly PomodoroTimer defaultTimer = PomodoroTimer.Default;
         private TimeSpan longBreakTs;
         private TimeSpan shortBreakTs;
         private TimeSpan taskTs;
 
+        // TODO: Fix the naming conflict between record and collect stats
         private Option(
             string TaskName = null,
             string TaskDuration = null,
@@ -34,6 +36,7 @@
             this.LogFilePath = LogFilePath;
 
             SetTimeSpans();
+            SetSetLength();
         }
 
         public bool BeAnnoying { get; set; }
@@ -177,7 +180,6 @@
 
         private void SetTimeSpans()
         {
-            var defaultTimer = PomodoroTimer.Default;
             if (!TimeSpan.TryParse(TaskDuration, out taskTs))
                 taskTs = defaultTimer.TaskDuration;
 
@@ -187,5 +189,11 @@
             if (!TimeSpan.TryParse(LongBreakDuration, out longBreakTs))
                 longBreakTs = defaultTimer.LongBreakDuration;
         }
+
+        // TODO: Add this with the above
+        private void SetSetLength() => 
+            SetLength = SetLength == 0 
+                ? defaultTimer.SetLength
+                : SetLength;
     }
 }

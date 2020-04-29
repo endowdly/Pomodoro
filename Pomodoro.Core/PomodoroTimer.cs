@@ -56,7 +56,7 @@
         public TimeSpan TaskDuration { get; }
         public TimeSpan ShortBreakDuration { get; }
         public TimeSpan LongBreakDuration { get; }
-        public int SetLength { get;  }
+        public int SetLength { get; }
         public int PomodoroCounter { get; private set; }
 
         public static PomodoroTimer Default = new PomodoroTimer(

@@ -2,12 +2,20 @@ Pomodoro.Console:
     ✔ BUG: Options are not being parsed correctly @started(20-04-03 16:22) @done(20-04-03 16:24) @lasted(2m54s)
     ✔ BUG: There is a visual artifact on some bars @started(20-04-03 15:26) @done(20-04-03 15:38) @lasted(12m46s)
     ✔ BUG: The double dash options are not parsed properly @started(20-04-27 16:17) @done(20-04-27 16:37) @lasted(20m34s)
-    ☐ BUG: Binary options are not parsed correctly when at the end of the option list
-    ☐ Add Other Options
+    ☐ BUG: Switches are not parsed correctly when the last argument
+    ☐ Set: Title to not display on --help or --version or first in general
+    ☐ Set: Unrecognized or bad switches/parameters warnings
+    ☐ Set: Unsupported features as warnings
+    ✔ FIX: broke the default set length display @started(20-04-29 15:35) @done(20-04-29 15:39) @lasted(4m19s)
+    
+    ☐ Set: Options to case insensitive
+
+    Add Other Options:
         ✔ Help! @started(20-04-27 14:57) @done(20-04-27 16:38) @lasted(1h41m2s)
         ✔ SetLength @started(20-04-27 14:57) @done(20-04-27 16:38) @lasted(1h41m6s)
         ☐ RecordStats
             ☐ New RecordStats Logging Object
         ☐ Be Annoying 
+
     ☐ Clean Code
         -- this means after everything is working, split code
